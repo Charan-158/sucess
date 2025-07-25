@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Send Animation</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #1e1e40, #2a407f);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .button {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: white;
+      padding: 16px 30px;
+      border-radius: 40px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #2a407f;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: background 0.3s ease;
+      min-width: 180px;
+    }
+
+    .plane-icon-static {
+      width: 28px;
+      height: 28px;
+      margin-right: 12px;
+      transition: opacity 0.2s;
+    }
+
+    .plane-icon-static svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .divider-line {
+      width: 2px;
+      height: 24px;
+      background-color: #ccc;
+      margin: 0 12px;
+      border-radius: 2px;
+      transition: opacity 0.2s;
+    }
+
+    .plane-orbit {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+    }
+
+    .plane-fly {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      transform-origin: center;
+      animation: orbit 2.2s ease-in-out forwards;
+    }
+
+    @keyframes orbit {
+      0% {
+        transform: rotate(0deg) translateX(0px) scale(1);
+        opacity: 1;
+      }
+      25% {
+        transform: rotate(90deg) translateX(60px);
+        opacity: 0.9;
+      }
+      50% {
+        transform: rotate(180deg) translateX(120px);
+        opacity: 0.7;
+      }
+      75% {
+        transform: rotate(270deg) translateX(60px);
+        opacity: 0.5;
+      }
+      100% {
+        transform: rotate(360deg) translateX(0px);
+        opacity: 0;
+      }
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #00bfff;
+      border-radius: 50%;
+      animation: sparkleFade 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes sparkleFade {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0.1);
+        opacity: 0;
+      }
+    }
+
+    .tick {
+      font-size: 26px;
+      color: green;
+      margin-left: 10px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .sent-text {
+      font-size: 22px;
+      color: green;
+      margin-left: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .sent-visible .tick,
+    .sent-visible .sent-text {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .hidden {
+      opacity: 0 !important;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="button" id="sendBtn">
+    <!-- Plane Icon (static left) -->
+    <div class="plane-icon-static" id="planeIcon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path fill="#00bfff" d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+      </svg>
+    </div>
+
+    <!-- Divider line -->
+    <div class="divider-line" id="dividerLine"></div>
+
+    <!-- Text -->
+    <span id="btnText">Send</span>
+
+    <!-- Tick + Sent (initially hidden) -->
+    <span class="tick" id="tick">✔</span>
+    <span class="sent-text" id="sent">Sent</span>
+
+    <!-- Orbit animation area -->
+    <div class="plane-orbit" id="orbitContainer"></div>
+  </div>
+</div>
+
+<script>
+  const sendBtn = document.getElementById("sendBtn");
+  const btnText = document.getElementById("btnText");
+  const tick = document.getElementById("tick");
+  const sent = document.getElementById("sent");
+  const orbitContainer = document.getElementById("orbitContainer");
+  const planeIcon = document.getElementById("planeIcon");
+  const dividerLine = document.getElementById("dividerLine");
+
+  sendBtn.addEventListener("click", () => {
+    if (btnText.textContent === "Sent") return;
+
+    // Hide main parts
+    btnText.classList.add("hidden");
+    planeIcon.classList.add("hidden");
+    dividerLine.classList.add("hidden");
+
+    // Create animated plane
+    const plane = document.createElement("div");
+    plane.className = "plane-fly";
+    plane.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path fill="#00bfff" d="M2 21l21-9L2 3v7l15 2-15 2z"/>
+      </svg>`;
+    orbitContainer.appendChild(plane);
+
+    // Sparkles
+    for (let i = 0; i < 12; i++) {
+      const sparkle = document.createElement("div");
+      sparkle.className = "sparkle";
+      sparkle.style.top = (40 + Math.random() * 20) + "px";
+      sparkle.style.left = (40 + Math.random() * 100) + "px";
+      orbitContainer.appendChild(sparkle);
+      setTimeout(() => sparkle.remove(), 1000);
+    }
+
+    // Show tick + Sent
+    setTimeout(() => {
+      sendBtn.classList.add("sent-visible");
+      btnText.textContent = "Sent";
+    }, 1500);
+
+    // Cleanup
+    setTimeout(() => {
+      orbitContainer.removeChild(plane);
+    }, 2200);
+  });
+</script>
+
+</body>
+</html>
